@@ -181,7 +181,7 @@ function Whiteboard() {
     const handleSave = async (e: any) => {
         e.preventDefault()
         try {
-            const response = await axios.post('http://localhost:9000/api/v1/draw/new', {
+            const response = await axios.post('https://test.trelyt.store/api/v1/draw/new', {
                 name: 'Test name',
                 shape: elements
             })

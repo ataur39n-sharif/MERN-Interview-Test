@@ -16,7 +16,7 @@ function HomepageComponent() {
 
     const fetchData = async () => {
         try {
-            const response = await axios.get('http://localhost:9000/api/v1/draw/list')
+            const response = await axios.get('https://test.trelyt.store/api/v1/draw/list')
             // console.log(response.data);
             setDrawingList(response.data.data)
 
@@ -27,7 +27,7 @@ function HomepageComponent() {
 
     const deleteData = async (id: string) => {
         try {
-            const response = await axios.delete(`http://localhost:9000/api/v1/draw/${id}`)
+            const response = await axios.delete(`https://test.trelyt.store/api/v1/draw/${id}`)
             // console.log(response.data);
             setDrawingList(response.data.data)
             setUpdate(!update)
