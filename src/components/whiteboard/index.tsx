@@ -3,8 +3,9 @@ import { Button } from 'react-bootstrap';
 import rough from "roughjs";
 import { RoughCanvas } from 'roughjs/bin/canvas';
 
-function Whiteboard() {
+const generator = rough.generator();
 
+function Whiteboard() {
     // canvas reference state
     const canvasRef = useRef(null);
     // canvas context reference state
@@ -34,9 +35,9 @@ function Whiteboard() {
     useLayoutEffect(() => {
         const roughCanvas = canvasRef.current !== null && rough.canvas(canvasRef.current)
 
-        // if (elements.length > 0) {
-        //     (ctxRef?.current as any)?.clearRect(0, 0, (canvasRef?.current as any)?.width, (canvasRef?.current as any)?.height)
-        // }
+        if (elements.length > 0) {
+            (ctxRef?.current as any)?.clearRect(0, 0, (canvasRef?.current as any)?.width, (canvasRef?.current as any)?.height)
+        }
 
         elements.forEach((element: any) => {
             if (element.type === "pencil") {
@@ -46,9 +47,22 @@ function Whiteboard() {
                     strokeWidth: 5,
                 })
             } else if (element.type === "line") {
-
+                (roughCanvas as RoughCanvas).draw(
+                    generator.line(element.offsetX, element.offsetY, element.width, element.height, {
+                        stroke: element.stroke,
+                        roughness: 0,
+                        strokeWidth: 5,
+                    })
+                )
+            } else if (element.type === "rectangle") {
+                (roughCanvas as RoughCanvas).draw(
+                    generator.rectangle(element.offsetX, element.offsetY, element.width, element.height, {
+                        stroke: element.stroke,
+                        roughness: 0,
+                        strokeWidth: 5,
+                    })
+                )
             }
-
         })
 
     }, [elements])
@@ -56,7 +70,7 @@ function Whiteboard() {
     const handleMouseDown = (e: any) => {
         setAllowDrawing(true)
         const { offsetX, offsetY } = e.nativeEvent
-        allowDrawing && console.log(offsetX, offsetY);
+        // allowDrawing && console.log(offsetX, offsetY);
         if (drawType === "pencil") {
             setElements((previousElements: any) => [
                 ...previousElements,
@@ -69,39 +83,86 @@ function Whiteboard() {
                 }
             ])
         } else if (drawType === "line") {
-
+            setElements((previousElements: any) => [
+                ...previousElements,
+                {
+                    type: 'line',
+                    offsetX,
+                    offsetY,
+                    stroke: 'black'
+                }
+            ])
+        } else if (drawType === "rectangle") {
+            setElements((previousElements: any) => [
+                ...previousElements,
+                {
+                    type: 'rectangle',
+                    offsetX,
+                    offsetY,
+                    stroke: 'black'
+                }
+            ])
         }
     }
     const handleMouseMove = (e: any) => {
-        const { offsetX, offsetY } = e.nativeEvent
-        allowDrawing && console.log(offsetX, offsetY);
-        if (allowDrawing) {
-            if (drawType === "pencil") {
-                const { path } = elements[elements.length - 1]
-                const newPath = [...path, [offsetX, offsetY]]
-
-                setElements((previousElements: any[]) => previousElements.map((element: any, index: number) => {
-                    if (index === elements.length - 1) {
-                        return {
-                            ...element,
-                            path: newPath
-                        }
-                    } else {
-                        return element
-                    }
-                }))
-            }else if (drawType === "line") {
-
-            }
+        if (!allowDrawing) {
+            return;
         }
+        const { offsetX, offsetY } = e.nativeEvent
 
+        if (drawType === "pencil") {
+            const { path } = elements[elements.length - 1]
+            const newPath = [...path, [offsetX, offsetY]]
+
+            setElements((previousElements: any[]) => previousElements.map((element: any, index: number) => {
+                if (index === elements.length - 1) {
+                    return {
+                        ...element,
+                        path: newPath
+                    }
+                } else {
+                    return element
+                }
+            }))
+        } else if (drawType === "line") {
+            setElements((previousElements: any[]) => previousElements.map((element: any, index: number) => {
+                if (index === elements.length - 1) {
+                    return {
+                        ...element,
+                        width: offsetX,
+                        height: offsetY
+                    }
+                } else {
+                    return element
+                }
+            }))
+        } else if (drawType === "rectangle") {
+            setElements((previousElements: any[]) => previousElements.map((element: any, index: number) => {
+                if (index === elements.length - 1) {
+                    return {
+                        ...element,
+                        width: offsetX - element.offsetX,
+                        height: offsetY - element.offsetY
+                    }
+                } else {
+                    return element
+                }
+            }))
+        }
     }
     const handleMouseUp = (e: any) => {
         setAllowDrawing(false)
-        const { offsetX, offsetY } = e.nativeEvent
-        allowDrawing && console.log(offsetX, offsetY);
+        // const { offsetX, offsetY } = e.nativeEvent
+        // allowDrawing && console.log(offsetX, offsetY);
+    }
 
+    const handleClearCanvas = () => {
+        const canvas = canvasRef.current as any
 
+        const ctx = canvas?.getContext('2d')
+        ctx.fillRect = "white";
+        (ctxRef?.current as any)?.clearRect(0, 0, (canvasRef?.current as any)?.width, (canvasRef?.current as any)?.height)
+        setElements([])
     }
 
 
@@ -121,7 +182,7 @@ function Whiteboard() {
                     </select>
                 </div>
                 <div>
-                    <Button variant="outline-danger"> Clear </Button>
+                    <Button variant="outline-danger" onClick={() => handleClearCanvas()}> Clear </Button>
                 </div>
             </div>
             <div
