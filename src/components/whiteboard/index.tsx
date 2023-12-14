@@ -1,3 +1,5 @@
+/* eslint-disable */
+import axios from 'axios';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Button } from 'react-bootstrap';
 import rough from "roughjs";
@@ -14,6 +16,7 @@ function Whiteboard() {
     // draw tool type - pencil, line , rectangle
     const [drawType, setDrawType] = useState('pencil')
     // draw color
+    /* eslint-disable */
     const [drawColor, setDrawColor] = useState('black')
     const [allowDrawing, setAllowDrawing] = useState(false)
 
@@ -30,6 +33,7 @@ function Whiteboard() {
         ctx.lineCap = "round"
 
         ctxRef.current = ctx
+        setDrawColor('black')
     }, [])
 
     useLayoutEffect(() => {
@@ -70,7 +74,6 @@ function Whiteboard() {
     const handleMouseDown = (e: any) => {
         setAllowDrawing(true)
         const { offsetX, offsetY } = e.nativeEvent
-        // allowDrawing && console.log(offsetX, offsetY);
         if (drawType === "pencil") {
             setElements((previousElements: any) => [
                 ...previousElements,
@@ -150,7 +153,8 @@ function Whiteboard() {
             }))
         }
     }
-    const handleMouseUp = (e: any) => {
+
+    const handleMouseUp = () => {
         setAllowDrawing(false)
         // const { offsetX, offsetY } = e.nativeEvent
         // allowDrawing && console.log(offsetX, offsetY);
@@ -165,37 +169,65 @@ function Whiteboard() {
         setElements([])
     }
 
+    useEffect(() => {
+        console.log(elements);
+    }, [elements])
+
+
+    const handleSave = async (e: any) => {
+        e.preventDefault()
+        try {
+            const response = await axios.post('http://localhost:9000/api/v1/draw/new', {
+                name: 'Test name',
+                shape: elements
+            })
+            console.log(response.data);
+        } catch (error) {
+            console.log(error);
+        }
+    }
 
     return (
-        <div className='w-100 h-75'>
-            <h1 className=''><ins>WhiteBoard</ins></h1>
-            <div className=' mt-3 p-2 d-flex justify-content-between align-items-center '>
-                <div>
-                    <label htmlFor="drawType">Draw Type : </label>
-                    <select name="drawType" id="drawType"
-                        className='ms-2'
-                        onChange={(e) => setDrawType(e.target.value)}
-                    >
-                        <option value="pencil">Pencil</option>
-                        <option value="line">Line</option>
-                        <option value="rectangle">Rectangle</option>
-                    </select>
+        <section className='container text-center d-flex justify-content-center align-items-center' style={{
+            height: '100vh',
+            width: '100vw'
+        }}>
+            <div className='w-100 h-75'>
+                <h1 className=''><ins>WhiteBoard</ins></h1>
+                <div className=' mt-3 p-2 d-flex justify-content-between align-items-center '>
+                    <div>
+                        <label htmlFor="drawType">Draw Type : </label>
+                        <select name="drawType" id="drawType"
+                            className='ms-2'
+                            onChange={(e) => setDrawType(e.target.value)}
+                        >
+                            <option value="pencil">Pencil</option>
+                            <option value="line">Line</option>
+                            <option value="rectangle">Rectangle</option>
+                        </select>
+                    </div>
+                    <div>
+                        <form className="input-group mb-3" onSubmit={(e) => handleSave(e)}>
+                            <input required type="text" className="form-control" placeholder="Drawing Name" aria-label="Drawing Name" aria-describedby="button-addon2" />
+                            <button className="btn btn-outline-success" type="submit" id="button-addon2">Save</button>
+                        </form>
+
+                        {/* <Button variant="outline-success me-2" onClick={() => handleClearCanvas()}> Save </Button> */}
+                        <Button variant="outline-danger" onClick={() => handleClearCanvas()}> Clear </Button>
+                    </div>
                 </div>
-                <div>
-                    <Button variant="outline-danger" onClick={() => handleClearCanvas()}> Clear </Button>
+                <div
+                    className='h-100 w-100 overflow-hidden  border border-black mb-5'
+                    onMouseDown={(e) => handleMouseDown(e)}
+                    onMouseUp={() => handleMouseUp()}
+                    onMouseMove={(e) => handleMouseMove(e)}
+                >
+                    <canvas
+                        ref={canvasRef}
+                    />
                 </div>
             </div>
-            <div
-                className='h-100 w-100 overflow-hidden  border border-black mb-5'
-                onMouseDown={(e) => handleMouseDown(e)}
-                onMouseUp={(e) => handleMouseUp(e)}
-                onMouseMove={(e) => handleMouseMove(e)}
-            >
-                <canvas
-                    ref={canvasRef}
-                />
-            </div>
-        </div>
+        </section>
     )
 }
 

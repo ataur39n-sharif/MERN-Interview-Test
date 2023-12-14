@@ -1,5 +1,5 @@
 // import './App.css'
-import Whiteboard from './components/whiteboard'
+import HomepageComponent from './components/home'
 
 function App() {
   return (
@@ -8,7 +8,8 @@ function App() {
         height: '100vh',
         width: '100vw'
       }}>
-        <Whiteboard />
+        <HomepageComponent />
+        {/* <Whiteboard /> */}
       </section>
     </>
   )
