@@ -20,7 +20,13 @@ function Whiteboard() {
 
     useEffect(() => {
         const canvas = canvasRef.current as any
+        canvas.height = window.innerHeight * 1
+        canvas.width = window.innerWidth * 1
+
         const ctx = canvas?.getContext('2d')
+        ctx.strokeStyle = drawColor
+        ctx.lineWidth = 2
+        ctx.lineCap = "round"
 
         ctxRef.current = ctx
     }, [])
@@ -28,9 +34,19 @@ function Whiteboard() {
     useLayoutEffect(() => {
         const roughCanvas = canvasRef.current !== null && rough.canvas(canvasRef.current)
 
+        // if (elements.length > 0) {
+        //     (ctxRef?.current as any)?.clearRect(0, 0, (canvasRef?.current as any)?.width, (canvasRef?.current as any)?.height)
+        // }
+
         elements.forEach((element: any) => {
             if (element.type === "pencil") {
-                (roughCanvas as RoughCanvas).linearPath(element.path)
+                (roughCanvas as RoughCanvas).linearPath(element.path, {
+                    stroke: element.stroke,
+                    roughness: 0,
+                    strokeWidth: 5,
+                })
+            } else if (element.type === "line") {
+
             }
 
         })
@@ -38,7 +54,6 @@ function Whiteboard() {
     }, [elements])
 
     const handleMouseDown = (e: any) => {
-        // console.log(e);
         setAllowDrawing(true)
         const { offsetX, offsetY } = e.nativeEvent
         allowDrawing && console.log(offsetX, offsetY);
@@ -53,8 +68,9 @@ function Whiteboard() {
                     stroke: 'black'
                 }
             ])
-        }
+        } else if (drawType === "line") {
 
+        }
     }
     const handleMouseMove = (e: any) => {
         const { offsetX, offsetY } = e.nativeEvent
@@ -74,6 +90,8 @@ function Whiteboard() {
                         return element
                     }
                 }))
+            }else if (drawType === "line") {
+
             }
         }
 
@@ -90,7 +108,7 @@ function Whiteboard() {
     return (
         <div className='w-100 h-75'>
             <h1 className=''><ins>WhiteBoard</ins></h1>
-            <div className=' mt-3 d-flex justify-content-between align-items-center '>
+            <div className=' mt-3 p-2 d-flex justify-content-between align-items-center '>
                 <div>
                     <label htmlFor="drawType">Draw Type : </label>
                     <select name="drawType" id="drawType"
@@ -106,13 +124,14 @@ function Whiteboard() {
                     <Button variant="outline-danger"> Clear </Button>
                 </div>
             </div>
-            <div className='h-100 p-3'>
+            <div
+                className='h-100 w-100 overflow-hidden  border border-black mb-5'
+                onMouseDown={(e) => handleMouseDown(e)}
+                onMouseUp={(e) => handleMouseUp(e)}
+                onMouseMove={(e) => handleMouseMove(e)}
+            >
                 <canvas
                     ref={canvasRef}
-                    className='h-100 w-100 border border-black'
-                    onMouseDown={(e) => handleMouseDown(e)}
-                    onMouseUp={(e) => handleMouseUp(e)}
-                    onMouseMove={(e) => handleMouseMove(e)}
                 />
             </div>
         </div>
