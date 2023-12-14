@@ -2,12 +2,16 @@
 import axios from 'axios';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Button } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 import rough from "roughjs";
 import { RoughCanvas } from 'roughjs/bin/canvas';
 
 const generator = rough.generator();
 
 function Whiteboard() {
+
+    const navigate = useNavigate()
+
     // canvas reference state
     const canvasRef = useRef(null);
     // canvas context reference state
@@ -182,6 +186,8 @@ function Whiteboard() {
                 shape: elements
             })
             console.log(response.data);
+            alert(response.data.message)
+            handleClearCanvas()
         } catch (error) {
             console.log(error);
         }
@@ -194,6 +200,11 @@ function Whiteboard() {
         }}>
             <div className='w-100 h-75'>
                 <h1 className=''><ins>WhiteBoard</ins></h1>
+                <div className="mt-3 p-2 d-flex justify-content-start">
+                    <Button
+                        onClick={() => navigate('/')}
+                        variant='outline-primary'> {'<'} Back to home</Button>
+                </div>
                 <div className=' mt-3 p-2 d-flex justify-content-between align-items-center '>
                     <div>
                         <label htmlFor="drawType">Draw Type : </label>

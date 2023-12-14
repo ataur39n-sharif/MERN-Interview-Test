@@ -9,7 +9,6 @@ function App() {
         width: '100vw'
       }}>
         <HomepageComponent />
-        {/* <Whiteboard /> */}
       </section>
     </>
   )
